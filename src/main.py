@@ -1,5 +1,4 @@
 import flask
-import json
 
 app = flask.Flask(__name__)
 

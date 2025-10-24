@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", function () {
   let designElements = [];
   let history = [];
   let historyIndex = -1;
+  let isDragging = false;
+  let isResizing = false;
+  let resizeHandle = null;
+  let elementOffsetX, elementOffsetY;
 
   // 初始化画布大小
   function initCanvasSize() {
@@ -44,6 +48,15 @@ document.addEventListener("DOMContentLoaded", function () {
         currentTool = this.dataset.tool;
         this.classList.add("active");
         updateCursor();
+
+        // 如果当前有选中的元素，根据工具类型处理调整手柄
+        if (selectedElement) {
+          if (currentTool === "move") {
+            addResizeHandles(selectedElement);
+          } else {
+            removeResizeHandles();
+          }
+        }
       } else if (this.dataset.material) {
         currentMaterial = this.dataset.material;
         this.classList.add("active");
@@ -129,6 +142,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // 根据元素类型添加特定样式
     if (elementData.type === "border") {
       element.classList.add("border-element");
+      // 创建矩形环（空心矩形）效果
+      element.style.backgroundColor = "transparent";
+      element.style.border = "3px solid #333";
     } else if (elementData.type === "mullion") {
       element.classList.add("mullion-element");
     } else if (elementData.type === "grid") {
@@ -164,11 +180,53 @@ document.addEventListener("DOMContentLoaded", function () {
     // 取消之前的选择
     if (selectedElement) {
       selectedElement.classList.remove("selected");
+      removeResizeHandles();
     }
 
     // 选择新元素
     selectedElement = element;
     element.classList.add("selected");
+
+    // 添加调整手柄
+    if (currentTool === "move") {
+      addResizeHandles(element);
+    }
+  }
+
+  // 添加调整手柄
+  function addResizeHandles(element) {
+    if (!element) return;
+
+    // 移除可能存在的旧手柄
+    removeResizeHandles();
+
+    // 添加四个调整手柄
+    const handles = ["nw", "ne", "sw", "se"];
+    handles.forEach((position) => {
+      const handle = document.createElement("div");
+      handle.classList.add("resize-handle", position);
+      element.appendChild(handle);
+
+      // 添加鼠标按下事件
+      handle.addEventListener("mousedown", function (e) {
+        e.stopPropagation();
+        isResizing = true;
+        resizeHandle = position;
+
+        // 保存当前位置和尺寸
+        const elementRect = selectedElement.getBoundingClientRect();
+        const canvasRect = designerCanvas.getBoundingClientRect();
+
+        // 准备历史记录
+        saveHistory();
+      });
+    });
+  }
+
+  // 移除调整手柄
+  function removeResizeHandles() {
+    const handles = document.querySelectorAll(".resize-handle");
+    handles.forEach((handle) => handle.remove());
   }
 
   // 鼠标按下事件
@@ -179,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.target === designerCanvas) {
       if (selectedElement) {
         selectedElement.classList.remove("selected");
+        removeResizeHandles();
         selectedElement = null;
       }
 
@@ -194,6 +253,22 @@ document.addEventListener("DOMContentLoaded", function () {
         selectionBox.style.top = startY + "px";
         selectionBox.style.width = "0px";
         selectionBox.style.height = "0px";
+      }
+    } else if (e.target.classList.contains("drawn-element")) {
+      // 点击的是元素
+      selectElement(e.target);
+
+      // 如果是移动工具，准备拖拽
+      if (currentTool === "move") {
+        isDragging = true;
+        const elementRect = e.target.getBoundingClientRect();
+        const canvasRect = designerCanvas.getBoundingClientRect();
+
+        elementOffsetX = e.clientX - elementRect.left;
+        elementOffsetY = e.clientY - elementRect.top;
+
+        // 准备历史记录
+        saveHistory();
       }
     }
   });
@@ -224,7 +299,82 @@ document.addEventListener("DOMContentLoaded", function () {
       selectionBox.style.width = width + "px";
       selectionBox.style.height = height + "px";
     }
+    // 拖拽移动元素
+    else if (isDragging && selectedElement) {
+      const canvasRect = designerCanvas.getBoundingClientRect();
+      const newX = e.clientX - canvasRect.left - elementOffsetX;
+      const newY = e.clientY - canvasRect.top - elementOffsetY;
+
+      // 更新元素位置
+      selectedElement.style.left = Math.max(0, newX) + "px";
+      selectedElement.style.top = Math.max(0, newY) + "px";
+
+      // 更新设计数据
+      updateElementData();
+    }
+    // 调整元素大小
+    else if (isResizing && selectedElement) {
+      const canvasRect = designerCanvas.getBoundingClientRect();
+      const x = e.clientX - canvasRect.left;
+      const y = e.clientY - canvasRect.top;
+
+      let elementLeft = parseInt(selectedElement.style.left);
+      let elementTop = parseInt(selectedElement.style.top);
+      let elementWidth = parseInt(selectedElement.style.width);
+      let elementHeight = parseInt(selectedElement.style.height);
+
+      // 根据手柄位置调整尺寸
+      if (resizeHandle.includes("w")) {
+        const newWidth = elementLeft + elementWidth - x;
+        if (newWidth > 20) {
+          elementLeft = x;
+          elementWidth = newWidth;
+        }
+      } else if (resizeHandle.includes("e")) {
+        elementWidth = Math.max(20, x - elementLeft);
+      }
+
+      if (resizeHandle.includes("n")) {
+        const newHeight = elementTop + elementHeight - y;
+        if (newHeight > 20) {
+          elementTop = y;
+          elementHeight = newHeight;
+        }
+      } else if (resizeHandle.includes("s")) {
+        elementHeight = Math.max(20, y - elementTop);
+      }
+
+      // 更新元素样式
+      selectedElement.style.left = elementLeft + "px";
+      selectedElement.style.top = elementTop + "px";
+      selectedElement.style.width = elementWidth + "px";
+      selectedElement.style.height = elementHeight + "px";
+
+      // 更新设计数据
+      updateElementData();
+    }
   });
+
+  // 更新元素数据
+  function updateElementData() {
+    if (!selectedElement) return;
+
+    // 找到对应的设计数据
+    const elementIndex = Array.from(designerCanvas.children).findIndex(
+      (child) => child === selectedElement
+    );
+
+    if (elementIndex !== -1 && elementIndex < designElements.length) {
+      designElements[elementIndex].x = parseInt(selectedElement.style.left);
+      designElements[elementIndex].y = parseInt(selectedElement.style.top);
+      designElements[elementIndex].width = parseInt(
+        selectedElement.style.width
+      );
+      designElements[elementIndex].height = parseInt(
+        selectedElement.style.height
+      );
+    }
+  }
 
   // 鼠标松开事件
   document.addEventListener("mouseup", function (e) {
@@ -258,6 +408,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // 添加到画布
         addElement(newElement);
       }
+    }
+    // 停止拖拽
+    else if (isDragging) {
+      isDragging = false;
+    }
+    // 停止调整大小
+    else if (isResizing) {
+      isResizing = false;
+      resizeHandle = null;
     }
   });
 
