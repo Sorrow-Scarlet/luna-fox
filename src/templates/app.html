@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luna Fox</title>
+    <link rel="stylesheet" href="../static/css/reset.css" />
+    <link rel="stylesheet" href="../static/css/layout.css" />
+    <link rel="stylesheet" href="../static/css/components.css" />
+    <link rel="stylesheet" href="../static/css/main.css" />
+  </head>
+  <body>
+    <!-- 导航栏 -->
+    <header class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-brand">
+          <h1>Luna Fox</h1>
+        </div>
+        <nav class="navbar-menu">
+          <a href="#" class="nav-item active">设计</a>
+          <a href="#" class="nav-item">导出</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main-container">
+      <!-- 侧边栏 -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3 class="section-title">边框</h3>
+          <div class="tool-group">
+            <button class="tool-btn">
+              <span class="tool-icon">↔</span>
+              <span class="tool-name">移动工具</span>
+            </button>
+            <button class="tool-btn">
+              <span class="tool-icon">▭</span>
+              <span class="tool-name">边框绘制</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="section-title">中梃</h3>
+          <div class="tool-group">
+            <button class="tool-btn">
+              <span class="tool-icon">│</span>
+              <span class="tool-name">中梃绘制</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="section-title">格条</h3>
+          <div class="tool-group">
+            <button class="tool-btn">
+              <span class="tool-icon">╬</span>
+              <span class="tool-name">格条绘制</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="section-title">开扇</h3>
+          <div class="tool-group">
+            <button class="tool-btn">
+              <span class="tool-icon">🪟</span>
+              <span class="tool-name">带纱窗</span>
+            </button>
+            <button class="tool-btn">
+              <span class="tool-icon">🪟</span>
+              <span class="tool-name">不带纱窗</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 设计器区域 -->
+      <section class="designer">
+        <div class="designer-canvas">
+          <div class="canvas-placeholder">
+            <p>设计画布</p>
+            <p class="placeholder-text">在此处绘制门窗设计</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底栏 -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <span class="status-item">
+          <span class="status-indicator saved"></span>
+          <span class="status-text">已保存</span>
+        </span>
+      </div>
+      <div class="status-right">
+        <button class="status-btn">
+          <span class="btn-icon">↶</span>
+          <span>撤销</span>
+        </button>
+        <button class="status-btn">
+          <span class="btn-icon">🗑</span>
+          <span>清除</span>
+        </button>
+        <button class="status-btn">
+          <span class="btn-icon">↷</span>
+          <span>恢复</span>
+        </button>
+      </div>
+    </footer>
+  </body>
+</html>

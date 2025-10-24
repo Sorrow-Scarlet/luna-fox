@@ -1,0 +1,74 @@
+/* 主样式文件 - 整体主题和全局调整 */
+
+/* 全局主题色 */
+:root {
+  --primary-gradient: linear-gradient(135deg, #802040 0%, #c43162 100%);
+  --primary-color: #802040;
+  --secondary-color: #c43162;
+  --success-color: #10b981;
+  --background-light: #f8f9fa;
+  --background-white: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #374151;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .navbar-container {
+    padding: 0 16px;
+  }
+
+  .status-bar {
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    position: absolute;
+    left: -200px;
+    height: 100%;
+    z-index: 100;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .designer {
+    width: 100%;
+  }
+}
