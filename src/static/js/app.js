@@ -145,6 +145,19 @@ document.addEventListener("DOMContentLoaded", function () {
       // 创建矩形环（空心矩形）效果
       element.style.backgroundColor = "transparent";
       element.style.border = "3px solid #333";
+
+      // 在内部距离描边10px的位置创建一个相同的矩形
+      const innerBorder = document.createElement("div");
+      innerBorder.classList.add("drawn-element", "inner-border");
+      innerBorder.style.position = "absolute";
+      innerBorder.style.left = "10px";
+      innerBorder.style.top = "10px";
+      innerBorder.style.width = elementData.width - 20 + "px";
+      innerBorder.style.height = elementData.height - 20 + "px";
+      innerBorder.style.backgroundColor = "transparent";
+      innerBorder.style.border = "3px solid #333";
+      innerBorder.style.pointerEvents = "none"; // 避免内部矩形影响点击交互
+      element.appendChild(innerBorder);
     } else if (elementData.type === "mullion") {
       element.classList.add("mullion-element");
     } else if (elementData.type === "grid") {
@@ -200,8 +213,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // 移除可能存在的旧手柄
     removeResizeHandles();
 
-    // 添加四个调整手柄
-    const handles = ["nw", "ne", "sw", "se"];
+    // 添加八个调整手柄（四个角和四个边）
+    const handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
     handles.forEach((position) => {
       const handle = document.createElement("div");
       handle.classList.add("resize-handle", position);
@@ -212,10 +225,6 @@ document.addEventListener("DOMContentLoaded", function () {
         e.stopPropagation();
         isResizing = true;
         resizeHandle = position;
-
-        // 保存当前位置和尺寸
-        const elementRect = selectedElement.getBoundingClientRect();
-        const canvasRect = designerCanvas.getBoundingClientRect();
 
         // 准备历史记录
         saveHistory();
@@ -324,24 +333,58 @@ document.addEventListener("DOMContentLoaded", function () {
       let elementHeight = parseInt(selectedElement.style.height);
 
       // 根据手柄位置调整尺寸
-      if (resizeHandle.includes("w")) {
-        const newWidth = elementLeft + elementWidth - x;
-        if (newWidth > 20) {
-          elementLeft = x;
-          elementWidth = newWidth;
-        }
-      } else if (resizeHandle.includes("e")) {
-        elementWidth = Math.max(20, x - elementLeft);
-      }
-
-      if (resizeHandle.includes("n")) {
-        const newHeight = elementTop + elementHeight - y;
-        if (newHeight > 20) {
-          elementTop = y;
-          elementHeight = newHeight;
-        }
-      } else if (resizeHandle.includes("s")) {
-        elementHeight = Math.max(20, y - elementTop);
+      switch (resizeHandle) {
+        case "nw":
+          const newWidthNW = elementLeft + elementWidth - x;
+          const newHeightNW = elementTop + elementHeight - y;
+          if (newWidthNW > 20 && newHeightNW > 20) {
+            elementLeft = x;
+            elementTop = y;
+            elementWidth = newWidthNW;
+            elementHeight = newHeightNW;
+          }
+          break;
+        case "n":
+          const newHeightN = elementTop + elementHeight - y;
+          if (newHeightN > 20) {
+            elementTop = y;
+            elementHeight = newHeightN;
+          }
+          break;
+        case "ne":
+          const newWidthNE = x - elementLeft;
+          const newHeightNE = elementTop + elementHeight - y;
+          if (newWidthNE > 20 && newHeightNE > 20) {
+            elementWidth = newWidthNE;
+            elementTop = y;
+            elementHeight = newHeightNE;
+          }
+          break;
+        case "e":
+          elementWidth = Math.max(20, x - elementLeft);
+          break;
+        case "se":
+          elementWidth = Math.max(20, x - elementLeft);
+          elementHeight = Math.max(20, y - elementTop);
+          break;
+        case "s":
+          elementHeight = Math.max(20, y - elementTop);
+          break;
+        case "sw":
+          const newWidthSW = elementLeft + elementWidth - x;
+          if (newWidthSW > 20) {
+            elementLeft = x;
+            elementWidth = newWidthSW;
+            elementHeight = Math.max(20, y - elementTop);
+          }
+          break;
+        case "w":
+          const newWidthW = elementLeft + elementWidth - x;
+          if (newWidthW > 20) {
+            elementLeft = x;
+            elementWidth = newWidthW;
+          }
+          break;
       }
 
       // 更新元素样式

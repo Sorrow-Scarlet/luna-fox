@@ -161,34 +161,63 @@
 
 .resize-handle {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 16px;
+  height: 16px;
   background-color: #802040;
   border: 1px solid white;
 }
 
 .resize-handle.nw {
-  top: -4px;
-  left: -4px;
+  top: -8px;
+  left: -8px;
   cursor: nw-resize;
 }
 
 .resize-handle.ne {
-  top: -4px;
-  right: -4px;
+  top: -8px;
+  right: -8px;
   cursor: ne-resize;
 }
 
 .resize-handle.sw {
-  bottom: -4px;
-  left: -4px;
+  bottom: -8px;
+  left: -8px;
   cursor: sw-resize;
 }
 
 .resize-handle.se {
-  bottom: -4px;
-  right: -4px;
+  bottom: -8px;
+  right: -8px;
   cursor: se-resize;
+}
+
+/* 四个边的调整手柄 */
+.resize-handle.n {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.resize-handle.s {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.resize-handle.e {
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.resize-handle.w {
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+  cursor: w-resize;
 }
 
 /* 底栏组件 */
