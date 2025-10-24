@@ -75,6 +75,20 @@
   background: #e5e7eb;
 }
 
+.tool-btn.active {
+  background: #802040;
+  color: white;
+}
+
+.tool-btn.active .tool-name {
+  background: #802040;
+  color: white;
+}
+
+.tool-btn.active .tool-icon {
+  color: white;
+}
+
 .tool-icon {
   font-size: 18px;
   color: #6b7280;
@@ -98,6 +112,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.selection-box {
+  position: absolute;
+  border: 2px dashed #802040;
+  display: none;
+  pointer-events: none;
 }
 
 .canvas-placeholder {
@@ -116,28 +148,60 @@
   font-weight: 400 !important;
 }
 
+.drawn-element {
+  position: absolute;
+  border: 2px solid #333;
+  background-color: rgba(200, 200, 200, 0.5);
+}
+
+.drawn-element.selected {
+  border: 2px solid #802040;
+  box-shadow: 0 0 0 2px rgba(128, 32, 64, 0.3);
+}
+
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #802040;
+  border: 1px solid white;
+}
+
+.resize-handle.nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle.ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle.sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle.se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
 /* 底栏组件 */
 .status-left {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
 .status-item {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #10b981;
-  animation: pulse 2s infinite;
-}
-
-.status-indicator.saved {
-  background: #10b981;
 }
 
 .status-text {
