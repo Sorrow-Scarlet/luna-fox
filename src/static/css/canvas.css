@@ -1,0 +1,123 @@
+/* 画布交互样式 */
+
+/* 画布覆盖层 */
+.canvas-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 设计器画布相对定位 */
+.designer-canvas {
+  position: relative;
+}
+
+/* 虚线选择框 */
+.selection-box {
+  position: absolute;
+  border: 2px dashed #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  pointer-events: none;
+  display: none;
+  border-radius: 4px;
+  animation: dashAnimation 0.5s linear infinite;
+}
+
+/* 虚线动画 */
+@keyframes dashAnimation {
+  0% {
+    border-dashoffset: 0;
+  }
+  100% {
+    border-dashoffset: 10;
+  }
+}
+
+/* 工具按钮激活状态 */
+.tool-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1) 0%,
+    rgba(118, 75, 162, 0.1) 100%
+  );
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tool-btn.active .tool-icon {
+  color: #667eea;
+}
+
+/* 画布鼠标样式 */
+.designer-canvas {
+  cursor: crosshair;
+}
+
+.designer-canvas.move-mode {
+  cursor: move;
+}
+
+.designer-canvas.drawing-mode {
+  cursor: crosshair;
+}
+
+/* 绘制的元素样式 */
+.drawn-element {
+  position: absolute;
+  border: 2px solid #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.drawn-element:hover {
+  border-color: #764ba2;
+  background: rgba(118, 75, 162, 0.1);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.drawn-element.selected {
+  border-color: #764ba2;
+  background: rgba(118, 75, 162, 0.15);
+  box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.3);
+}
+
+/* 元素控制点 */
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #667eea;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  display: none;
+}
+
+.drawn-element.selected .resize-handle {
+  display: block;
+}
+
+.resize-handle.nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+.resize-handle.ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+.resize-handle.sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+.resize-handle.se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}

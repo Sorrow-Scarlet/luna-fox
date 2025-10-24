@@ -30,11 +30,11 @@
         <div class="sidebar-section">
           <h3 class="section-title">边框</h3>
           <div class="tool-group">
-            <button class="tool-btn">
+            <button class="tool-btn active" data-tool="move">
               <span class="tool-icon">↔</span>
               <span class="tool-name">移动工具</span>
             </button>
-            <button class="tool-btn">
+            <button class="tool-btn" data-tool="border">
               <span class="tool-icon">▭</span>
               <span class="tool-name">边框绘制</span>
             </button>
@@ -44,7 +44,7 @@
         <div class="sidebar-section">
           <h3 class="section-title">中梃</h3>
           <div class="tool-group">
-            <button class="tool-btn">
+            <button class="tool-btn" data-tool="mullion">
               <span class="tool-icon">│</span>
               <span class="tool-name">中梃绘制</span>
             </button>
@@ -54,7 +54,7 @@
         <div class="sidebar-section">
           <h3 class="section-title">格条</h3>
           <div class="tool-group">
-            <button class="tool-btn">
+            <button class="tool-btn" data-tool="grid">
               <span class="tool-icon">╬</span>
               <span class="tool-name">格条绘制</span>
             </button>
@@ -64,11 +64,11 @@
         <div class="sidebar-section">
           <h3 class="section-title">开扇</h3>
           <div class="tool-group">
-            <button class="tool-btn">
+            <button class="tool-btn" data-tool="sash-with-screen">
               <span class="tool-icon">🪟</span>
               <span class="tool-name">带纱窗</span>
             </button>
-            <button class="tool-btn">
+            <button class="tool-btn" data-tool="sash-no-screen">
               <span class="tool-icon">🪟</span>
               <span class="tool-name">不带纱窗</span>
             </button>
@@ -78,7 +78,12 @@
 
       <!-- 设计器区域 -->
       <section class="designer">
-        <div class="designer-canvas">
+        <div class="designer-canvas" id="designerCanvas">
+          <!-- 画布覆盖层，用于绘制选择框 -->
+          <div class="canvas-overlay" id="canvasOverlay">
+            <!-- 虚线选择框 -->
+            <div class="selection-box" id="selectionBox"></div>
+          </div>
           <div class="canvas-placeholder">
             <p>设计画布</p>
             <p class="placeholder-text">在此处绘制门窗设计</p>
@@ -96,19 +101,22 @@
         </span>
       </div>
       <div class="status-right">
-        <button class="status-btn">
+        <button class="status-btn" id="undoBtn">
           <span class="btn-icon">↶</span>
           <span>撤销</span>
         </button>
-        <button class="status-btn">
+        <button class="status-btn" id="clearBtn">
           <span class="btn-icon">🗑</span>
           <span>清除</span>
         </button>
-        <button class="status-btn">
+        <button class="status-btn" id="redoBtn">
           <span class="btn-icon">↷</span>
           <span>恢复</span>
         </button>
       </div>
     </footer>
+
+    <!-- 引入 JavaScript -->
+    <script src="../static/js/canvas-interaction.js"></script>
   </body>
 </html>

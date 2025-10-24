@@ -1,5 +1,4 @@
 import flask
-import modules.util
 
 app = flask.Flask(__name__)
 
@@ -10,5 +9,4 @@ def index():
 
 
 if __name__ == "__main__":
-    util = modules.util.drawHelper(app)
     app.run(debug=True)
