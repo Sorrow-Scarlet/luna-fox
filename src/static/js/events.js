@@ -38,27 +38,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // 如果当前工具不是移动工具，开始绘制
       if (state.currentTool !== "move") {
-        if (state.currentTool === "mullion") {
-          // 中梃绘制特殊处理
-          state.isMullionDrawing = true;
-          const coords = getCanvasCoordinates(e);
-          state.mullionStartPoint = coords;
-          state.mullionEndPoint = { ...coords };
-          window.updateMullionIndicator();
-        } else {
-          // 其他工具的标准绘制
-          state.isDrawing = true;
-          const coords = getCanvasCoordinates(e);
-          state.startX = coords.x;
-          state.startY = coords.y;
+        state.isDrawing = true;
+        const coords = getCanvasCoordinates(e);
+        state.startX = coords.x;
+        state.startY = coords.y;
 
-          // 显示选择框
-          window.selectionBox.style.display = "block";
-          window.selectionBox.style.left = state.startX + "px";
-          window.selectionBox.style.top = state.startY + "px";
-          window.selectionBox.style.width = "0px";
-          window.selectionBox.style.height = "0px";
-        }
+        // 显示选择框
+        window.selectionBox.style.display = "block";
+        window.selectionBox.style.left = state.startX + "px";
+        window.selectionBox.style.top = state.startY + "px";
+        window.selectionBox.style.width = "0px";
+        window.selectionBox.style.height = "0px";
       }
     } else if (e.target.classList.contains("drawn-element")) {
       // 点击的是元素 - 委托给elements.js中的selectElement函数处理
@@ -96,13 +86,8 @@ document.addEventListener("DOMContentLoaded", function () {
       coords.x
     )}, ${Math.round(coords.y)})`;
 
-    // 绘制中梃时更新指示线
-    if (state.isMullionDrawing) {
-      state.mullionEndPoint = coords;
-      window.updateMullionIndicator();
-    }
     // 绘制过程中更新选择框
-    else if (state.isDrawing) {
+    if (state.isDrawing) {
       const currentX = coords.x;
       const currentY = coords.y;
 
@@ -253,57 +238,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const state = window.appState;
     if (!state) return;
 
-    if (state.isMullionDrawing) {
-      state.isMullionDrawing = false;
-
-      // 隐藏指示线
-      if (state.mullionIndicator) {
-        state.mullionIndicator.style.display = "none";
-      }
-
-      // 获取绘制的中梃尺寸
-      if (state.mullionStartPoint && state.mullionEndPoint) {
-        const width = Math.abs(
-          state.mullionEndPoint.x - state.mullionStartPoint.x
-        );
-        const height = Math.abs(
-          state.mullionEndPoint.y - state.mullionStartPoint.y
-        );
-
-        // 只有当尺寸足够大时才添加元素
-        if (width > 10 || height > 10) {
-          // 保存历史记录
-          window.saveHistory();
-
-          // 创建新中梃元素
-          const left = Math.min(
-            state.mullionStartPoint.x,
-            state.mullionEndPoint.x
-          );
-          const top = Math.min(
-            state.mullionStartPoint.y,
-            state.mullionEndPoint.y
-          );
-
-          // 确定中梃方向
-          const isHorizontal = width > height;
-
-          const newElement = {
-            type: state.currentTool,
-            x: left,
-            y: top,
-            width: isHorizontal ? width : 10,
-            height: isHorizontal ? 10 : height,
-            isHorizontal: isHorizontal,
-          };
-
-          // 添加到画布
-          window.addElement(newElement);
-        }
-      }
-    }
-    // 处理其他工具的绘制
-    else if (state.isDrawing) {
+    // 处理所有工具的绘制
+    if (state.isDrawing) {
       state.isDrawing = false;
 
       // 隐藏选择框
@@ -328,6 +264,18 @@ document.addEventListener("DOMContentLoaded", function () {
           width: width,
           height: height,
         };
+
+        // 对于中梃工具，需要确定方向
+        if (state.currentTool === "mullion") {
+          const isHorizontal = width > height;
+          newElement.isHorizontal = isHorizontal;
+          // 中梃的宽度或高度固定为10px
+          if (isHorizontal) {
+            newElement.height = 10;
+          } else {
+            newElement.width = 10;
+          }
+        }
 
         // 添加到画布
         window.addElement(newElement);

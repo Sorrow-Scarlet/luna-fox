@@ -56,12 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
       window.initTools();
       window.initEvents();
 
-      // 创建中梃指示线元素
-      window.appState.mullionIndicator = document.createElement("div");
-      window.appState.mullionIndicator.classList.add("mullion-indicator");
-      window.appState.mullionIndicator.style.display = "none";
-      window.canvasOverlay.appendChild(window.appState.mullionIndicator);
-
       console.log("应用初始化完成");
       return true;
     }

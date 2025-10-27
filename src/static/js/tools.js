@@ -46,38 +46,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // 更新中梃指示线
-  window.updateMullionIndicator = function () {
-    const state = window.appState;
-    if (
-      !state ||
-      !state.mullionStartPoint ||
-      !state.mullionEndPoint ||
-      !state.mullionIndicator
-    ) {
-      return;
-    }
-
-    const width = Math.abs(state.mullionEndPoint.x - state.mullionStartPoint.x);
-    const height = Math.abs(
-      state.mullionEndPoint.y - state.mullionStartPoint.y
-    );
-    const left = Math.min(state.mullionStartPoint.x, state.mullionEndPoint.x);
-    const top = Math.min(state.mullionStartPoint.y, state.mullionEndPoint.y);
-
-    state.mullionIndicator.style.display = "block";
-    state.mullionIndicator.style.left = left + "px";
-    state.mullionIndicator.style.top = top + "px";
-    state.mullionIndicator.style.width = width + "px";
-    state.mullionIndicator.style.height = height + "px";
-
-    // 设置旋转角度
-    if (width > height) {
-      state.mullionIndicator.style.transform = "rotate(0deg)";
-    } else {
-      state.mullionIndicator.style.transform = "rotate(90deg)";
-    }
-  };
-
   // 初始化由base.js统一控制，不再需要通知主模块
 });

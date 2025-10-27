@@ -51,16 +51,6 @@
   z-index: 20;
 }
 
-/* 中梃指示线样式 */
-.mullion-indicator {
-  position: absolute;
-  background-color: transparent;
-  border: 2px dashed #667eea;
-  pointer-events: none;
-  z-index: 30;
-  border-radius: 2px;
-}
-
 .grid-element {
   background-color: rgba(128, 32, 64, 0.05);
   border: 1px dashed #802040;
