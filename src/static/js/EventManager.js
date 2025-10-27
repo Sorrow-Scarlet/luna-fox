@@ -212,6 +212,11 @@ class EventManager {
 
   // 调整元素大小
   resizeElement(e) {
+    // 如果是中梃元素，不进行大小调整（中梃只能移动，不能缩放）
+    if (this.state.selectedElement.classList.contains("mullion-element")) {
+      return;
+    }
+
     const canvasRect = this.canvas.getBoundingClientRect();
     const x = e.clientX - canvasRect.left;
     const y = e.clientY - canvasRect.top;
@@ -345,11 +350,19 @@ class EventManager {
     const borderData = this.elementManager.getElementData(borderElement);
     if (!borderData) return;
 
-    // 计算内框矩形（考虑10px内边距）
-    const innerX = borderData.x + 10;
-    const innerY = borderData.y + 10;
-    const innerWidth = Math.max(20, borderData.width - 20);
-    const innerHeight = Math.max(20, borderData.height - 20);
+    // 计算内框矩形（考虑10px内边距和3px边框宽度）
+    const padding = 10;
+    const innerBorderWidth = 3;
+    const innerX = borderData.x + padding;
+    const innerY = borderData.y + padding;
+    const innerWidth = Math.min(
+      Math.max(10, borderData.width - padding * 2 - innerBorderWidth * 2),
+      borderData.width - padding * 2 - innerBorderWidth * 2 - 1
+    );
+    const innerHeight = Math.min(
+      Math.max(10, borderData.height - padding * 2 - innerBorderWidth * 2),
+      borderData.height - padding * 2 - innerBorderWidth * 2 - 1
+    );
 
     if (this.state.mullionType === "mullion-horizontal") {
       // 水平中梃：上下分割
@@ -456,11 +469,19 @@ class EventManager {
       const borderData = this.elementManager.getElementData(borderElement);
       if (!borderData) return;
 
-      // 计算内框矩形（考虑10px内边距）
-      const innerX = borderData.x + 10;
-      const innerY = borderData.y + 10;
-      const innerWidth = Math.max(20, borderData.width - 20);
-      const innerHeight = Math.max(20, borderData.height - 20);
+      // 计算内框矩形（考虑10px内边距和3px边框宽度）
+      const padding = 10;
+      const innerBorderWidth = 3;
+      const innerX = borderData.x + padding;
+      const innerY = borderData.y + padding;
+      const innerWidth = Math.min(
+        Math.max(10, borderData.width - padding * 2 - innerBorderWidth * 2),
+        borderData.width - padding * 2 - innerBorderWidth * 2 - 1
+      );
+      const innerHeight = Math.min(
+        Math.max(10, borderData.height - padding * 2 - innerBorderWidth * 2),
+        borderData.height - padding * 2 - innerBorderWidth * 2 - 1
+      );
 
       if (this.state.currentTool === "mullion-horizontal") {
         // 水平中梃：连接左右边，垂直分割

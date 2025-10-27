@@ -119,6 +119,11 @@ class ElementManager {
   addResizeHandles(element) {
     if (!element) return;
 
+    // 如果是中梃元素，不添加调整手柄（中梃只能移动，不能缩放）
+    if (element.classList.contains("mullion-element")) {
+      return;
+    }
+
     // 移除可能存在的旧手柄
     this.removeResizeHandles();
 
@@ -333,38 +338,58 @@ class ElementManager {
 
     const mullions = this.state.mullionGroups.get(borderElement);
     mullions.forEach((mullion) => {
-      // 获取中梃的当前位置和尺寸
-      const currentLeft = parseInt(mullion.style.left) || 0;
-      const currentTop = parseInt(mullion.style.top) || 0;
-      const currentWidth = parseInt(mullion.style.width) || 0;
-      const currentHeight = parseInt(mullion.style.height) || 0;
-
       // 获取边框的当前位置和尺寸
       const borderLeft = parseInt(borderElement.style.left) || 0;
       const borderTop = parseInt(borderElement.style.top) || 0;
       const borderWidth = parseInt(borderElement.style.width) || 0;
       const borderHeight = parseInt(borderElement.style.height) || 0;
 
-      // 计算中梃相对于边框的相对位置
-      const relativeLeft = (currentLeft - borderLeft) / borderWidth;
-      const relativeTop = (currentTop - borderTop) / borderHeight;
+      // 计算内矩形尺寸（与边框内矩形保持一致）
+      const padding = 10;
+      const innerBorderWidth = 3;
+      const innerWidth = Math.max(
+        10,
+        Math.min(
+          borderWidth - padding * 2 - innerBorderWidth * 2 - 1,
+          borderWidth - padding * 2 - innerBorderWidth * 2
+        )
+      );
+      const innerHeight = Math.max(
+        10,
+        Math.min(
+          borderHeight - padding * 2 - innerBorderWidth * 2 - 1,
+          borderHeight - padding * 2 - innerBorderWidth * 2
+        )
+      );
 
-      // 应用新的位置（保持相对比例），但保持中梃厚度为10px
-      mullion.style.left =
-        borderLeft + relativeLeft * borderWidth * scaleX + deltaX + "px";
-      mullion.style.top =
-        borderTop + relativeTop * borderHeight * scaleY + deltaY + "px";
+      // 获取中梃的当前位置（用于计算分割比例）
+      const currentLeft = parseInt(mullion.style.left) || 0;
+      const currentTop = parseInt(mullion.style.top) || 0;
 
-      // 中梃厚度始终为10px，不随比例缩放
+      // 计算中梃相对于内矩形的分割比例
       const elementData = this.getElementData(mullion);
       if (elementData && elementData.type === "mullion-horizontal") {
-        // 水平中梃：宽度随边框缩放，高度保持10px
-        mullion.style.width = currentWidth * scaleX + "px";
+        // 水平中梃：垂直分割，计算Y轴比例
+        const relativeY = (currentTop - borderTop - padding) / borderHeight;
+        const ratio = Math.max(0.1, Math.min(0.9, relativeY));
+
+        // 重新计算中梃位置和尺寸：跨越内矩形宽度，厚度10px
+        mullion.style.left = borderLeft + padding + "px";
+        mullion.style.top =
+          borderTop + padding + innerHeight * ratio - 5 + "px"; // 居中位置
+        mullion.style.width = innerWidth + "px";
         mullion.style.height = "10px";
       } else if (elementData && elementData.type === "mullion-vertical") {
-        // 垂直中梃：高度随边框缩放，宽度保持10px
+        // 垂直中梃：水平分割，计算X轴比例
+        const relativeX = (currentLeft - borderLeft - padding) / borderWidth;
+        const ratio = Math.max(0.1, Math.min(0.9, relativeX));
+
+        // 重新计算中梃位置和尺寸：跨越内矩形高度，厚度10px
+        mullion.style.left =
+          borderLeft + padding + innerWidth * ratio - 5 + "px"; // 居中位置
+        mullion.style.top = borderTop + padding + "px";
         mullion.style.width = "10px";
-        mullion.style.height = currentHeight * scaleY + "px";
+        mullion.style.height = innerHeight + "px";
       }
 
       // 更新设计数据
