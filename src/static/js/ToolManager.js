@@ -40,14 +40,31 @@ class ToolManager {
         // 重新添加调整手柄
         if (window.app && window.app.elementManager) {
           window.app.elementManager.removeResizeHandles();
+          window.app.elementManager.removeMullionDragHandles();
           window.app.elementManager.addResizeHandles(
             this.state.selectedElement
           );
+
+          // 如果是中梃元素，添加拖动手柄
+          if (
+            this.state.selectedElement.classList.contains("mullion-element")
+          ) {
+            const mullionType = window.app.elementManager.getMullionType(
+              this.state.selectedElement
+            );
+            if (mullionType) {
+              window.app.elementManager.addMullionDragHandle(
+                this.state.selectedElement,
+                mullionType
+              );
+            }
+          }
         }
       } else {
-        // 移除调整手柄
+        // 移除调整手柄和中梃拖动手柄
         if (window.app && window.app.elementManager) {
           window.app.elementManager.removeResizeHandles();
+          window.app.elementManager.removeMullionDragHandles();
         }
       }
     }

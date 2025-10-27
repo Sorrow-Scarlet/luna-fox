@@ -63,8 +63,10 @@ class ElementManager {
       element.style.border = "none";
       element.style.zIndex = "20";
 
-      // 添加拖动调节手柄
-      this.addMullionDragHandle(element, elementData.type);
+      // 只有在移动工具激活时才添加拖动调节手柄
+      if (this.state.currentTool === "move") {
+        this.addMullionDragHandle(element, elementData.type);
+      }
     } else if (elementData.type === "grid") {
       element.classList.add("grid-element");
     } else if (elementData.type === "sash-with-screen") {
@@ -102,6 +104,7 @@ class ElementManager {
     if (this.state.selectedElement) {
       this.state.selectedElement.classList.remove("selected");
       this.removeResizeHandles();
+      this.removeMullionDragHandles();
     }
 
     // 选择新元素
@@ -113,6 +116,11 @@ class ElementManager {
       // 确保先移除所有现有手柄
       this.removeResizeHandles();
       this.addResizeHandles(element);
+
+      // 如果是中梃元素，添加拖动手柄
+      if (element.classList.contains("mullion-element")) {
+        this.addMullionDragHandle(element, this.getMullionType(element));
+      }
     }
   }
 
@@ -148,6 +156,21 @@ class ElementManager {
   removeResizeHandles() {
     const handles = document.querySelectorAll(".resize-handle");
     handles.forEach((handle) => handle.remove());
+  }
+
+  // 移除中梃拖动手柄
+  removeMullionDragHandles() {
+    const handles = document.querySelectorAll(".mullion-drag-handle");
+    handles.forEach((handle) => handle.remove());
+  }
+
+  // 获取中梃元素的类型
+  getMullionType(element) {
+    const elementData = this.getElementData(element);
+    if (elementData && elementData.type) {
+      return elementData.type;
+    }
+    return null;
   }
 
   // 获取元素对应的设计数据
@@ -247,8 +270,19 @@ class ElementManager {
     dragHandle.style.borderRadius = "2px";
     dragHandle.style.zIndex = "30";
 
+    // 初始状态：只有在移动工具激活时才显示
+    if (this.state.currentTool === "move") {
+      dragHandle.style.display = "block";
+    } else {
+      dragHandle.style.display = "none";
+    }
+
     // 添加鼠标事件
     dragHandle.addEventListener("mousedown", (e) => {
+      // 只有在移动工具激活时才允许拖动
+      if (this.state.currentTool !== "move") {
+        return;
+      }
       e.stopPropagation();
       this.state.isMullionDragging = true;
       this.state.activeMullion = element;
