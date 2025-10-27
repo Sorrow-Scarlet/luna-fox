@@ -401,8 +401,13 @@ class EventManager {
         innerY + innerHeight * ratio - this.state.mullionWidth / 2;
       this.state.activeMullion.style.top = mullionY + "px";
 
-      // 更新分割比例
-      this.state.mullionSplitRatio = ratio;
+      // 更新当前中梃的分割比例（存储到元素数据中）
+      const elementData = this.elementManager.getElementData(
+        this.state.activeMullion
+      );
+      if (elementData) {
+        elementData.splitRatio = ratio;
+      }
     } else {
       // 垂直中梃：左右分割
       const relativeX = coords.x - innerX;
@@ -413,8 +418,13 @@ class EventManager {
         innerX + innerWidth * ratio - this.state.mullionWidth / 2;
       this.state.activeMullion.style.left = mullionX + "px";
 
-      // 更新分割比例
-      this.state.mullionSplitRatio = ratio;
+      // 更新当前中梃的分割比例（存储到元素数据中）
+      const elementData = this.elementManager.getElementData(
+        this.state.activeMullion
+      );
+      if (elementData) {
+        elementData.splitRatio = ratio;
+      }
     }
   }
 
@@ -494,6 +504,7 @@ class EventManager {
         width: innerWidth,
         height: this.state.mullionWidth,
         type: "mullion-horizontal",
+        splitRatio: ratio, // 存储中梃的分割比例
       };
     } else if (this.state.currentTool === "mullion-vertical") {
       // 垂直中梃：基于X坐标位置创建
@@ -506,6 +517,7 @@ class EventManager {
         width: this.state.mullionWidth,
         height: innerHeight,
         type: "mullion-vertical",
+        splitRatio: ratio, // 存储中梃的分割比例
       };
     }
 
@@ -594,6 +606,7 @@ class EventManager {
           width: innerWidth,
           height: this.state.mullionWidth,
           type: "mullion-horizontal",
+          splitRatio: this.state.mullionSplitRatio, // 存储中梃的分割比例
         };
       } else {
         // 垂直中梃：连接上下边，水平分割
@@ -607,6 +620,7 @@ class EventManager {
           width: this.state.mullionWidth,
           height: innerHeight,
           type: "mullion-vertical",
+          splitRatio: this.state.mullionSplitRatio, // 存储中梃的分割比例
         };
       }
     } else {

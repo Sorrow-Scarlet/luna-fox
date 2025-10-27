@@ -367,12 +367,11 @@ class ElementManager {
       const currentLeft = parseInt(mullion.style.left) || 0;
       const currentTop = parseInt(mullion.style.top) || 0;
 
-      // 计算中梃相对于内矩形的分割比例
+      // 获取中梃元素数据（包含存储的分割比例）
       const elementData = this.getElementData(mullion);
       if (elementData && elementData.type === "mullion-horizontal") {
-        // 水平中梃：垂直分割，计算Y轴比例
-        const relativeY = (currentTop - borderTop - padding) / borderHeight;
-        const ratio = Math.max(0.1, Math.min(0.9, relativeY));
+        // 水平中梃：使用存储的分割比例，而不是重新计算
+        const ratio = elementData.splitRatio || 0.5; // 默认使用0.5如果未设置
 
         // 重新计算中梃位置和尺寸：跨越内矩形宽度，厚度10px
         mullion.style.left = borderLeft + padding + "px";
@@ -381,9 +380,8 @@ class ElementManager {
         mullion.style.width = innerWidth + "px";
         mullion.style.height = "10px";
       } else if (elementData && elementData.type === "mullion-vertical") {
-        // 垂直中梃：水平分割，计算X轴比例
-        const relativeX = (currentLeft - borderLeft - padding) / borderWidth;
-        const ratio = Math.max(0.1, Math.min(0.9, relativeX));
+        // 垂直中梃：使用存储的分割比例，而不是重新计算
+        const ratio = elementData.splitRatio || 0.5; // 默认使用0.5如果未设置
 
         // 重新计算中梃位置和尺寸：跨越内矩形高度，厚度10px
         mullion.style.left =
