@@ -1,12 +1,13 @@
-// 元素管理模块 - 处理元素的添加、选择和调整等功能
-document.addEventListener("DOMContentLoaded", function () {
-  // 初始化元素管理功能
-  window.initElements = function () {
-    // 元素管理功能已通过函数导出，无需额外初始化
-  };
+// 元素管理器类 - 处理元素的添加、选择和调整等功能
+class ElementManager {
+  constructor(canvas, canvasOverlay, state) {
+    this.canvas = canvas;
+    this.canvasOverlay = canvasOverlay;
+    this.state = state;
+  }
 
   // 添加元素到画布
-  window.addElement = function (elementData) {
+  addElement(elementData) {
     const element = document.createElement("div");
     element.classList.add("drawn-element");
     element.style.left = elementData.x + "px";
@@ -33,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const innerBorderWidth = 3;
 
       // 计算内部矩形的大小，考虑内矩形自身的边框宽度，确保与外部矩形四边都保持10px间距
-      // 公式：内部矩形宽度 = 外部矩形宽度 - 2 * 内边距 - 2 * 内部矩形边框宽度
       const innerWidth = Math.max(
         20,
         elementData.width - padding * 2 - innerBorderWidth * 2
@@ -67,47 +67,46 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 添加到画布
-    window.designerCanvas.insertBefore(element, window.canvasOverlay);
+    this.canvas.insertBefore(element, this.canvasOverlay);
 
     // 添加点击事件
-    element.addEventListener("click", function (e) {
+    element.addEventListener("click", (e) => {
       e.stopPropagation();
-      selectElement(element);
+      this.selectElement(element);
     });
 
     // 保存到设计元素数组
-    window.appState.designElements.push(elementData);
+    this.state.designElements.push(elementData);
 
     return element;
-  };
+  }
 
   // 选择元素
-  function selectElement(element) {
-    const state = window.appState;
+  selectElement(element) {
     // 取消之前的选择
-    if (state.selectedElement) {
-      state.selectedElement.classList.remove("selected");
-      removeResizeHandles();
+    if (this.state.selectedElement) {
+      this.state.selectedElement.classList.remove("selected");
+      this.removeResizeHandles();
     }
 
     // 选择新元素
-    state.selectedElement = element;
+    this.state.selectedElement = element;
     element.classList.add("selected");
 
     // 添加调整手柄
-    if (state.currentTool === "move") {
+    if (this.state.currentTool === "move") {
       // 确保先移除所有现有手柄
-      removeResizeHandles();
-      addResizeHandles(element);
+      this.removeResizeHandles();
+      this.addResizeHandles(element);
     }
   }
 
   // 添加调整手柄
-  function addResizeHandles(element) {
+  addResizeHandles(element) {
     if (!element) return;
 
     // 移除可能存在的旧手柄
-    removeResizeHandles();
+    this.removeResizeHandles();
 
     // 添加八个调整手柄（四个角和四个边）
     const handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
@@ -117,52 +116,44 @@ document.addEventListener("DOMContentLoaded", function () {
       element.appendChild(handle);
 
       // 添加鼠标按下事件
-      handle.addEventListener("mousedown", function (e) {
+      handle.addEventListener("mousedown", (e) => {
         e.stopPropagation();
-        window.appState.isResizing = true;
-        window.appState.resizeHandle = position;
-
-        // 准备历史记录
-        window.saveHistory();
+        this.state.isResizing = true;
+        this.state.resizeHandle = position;
       });
     });
   }
 
   // 移除调整手柄
-  function removeResizeHandles() {
+  removeResizeHandles() {
     const handles = document.querySelectorAll(".resize-handle");
     handles.forEach((handle) => handle.remove());
   }
 
   // 获取元素对应的设计数据
-  window.getElementData = function (element) {
-    const state = window.appState;
-
+  getElementData(element) {
     // 尝试通过元素的唯一标识查找数据
-    // 这里使用位置索引作为临时解决方案
-    // 在实际应用中应该为每个元素添加唯一ID
-    const elements = Array.from(window.designerCanvas.children).filter(
-      (child) => child !== window.canvasOverlay
+    const elements = Array.from(this.canvas.children).filter(
+      (child) => child !== this.canvasOverlay
     );
 
     const index = elements.indexOf(element);
 
-    if (index !== -1 && index < state.designElements.length) {
-      return state.designElements[index];
+    if (index !== -1 && index < this.state.designElements.length) {
+      return this.state.designElements[index];
     }
 
     return null;
-  };
+  }
 
   // 更新元素数据
-  window.updateElementData = function (element) {
-    const state = window.appState;
-    const targetElement = element || state.selectedElement;
+  updateElementData(element = null) {
+    const targetElement = element || this.state.selectedElement;
 
     if (!targetElement) return;
 
     // 获取对应的设计数据
-    const elementData = window.getElementData(targetElement);
+    const elementData = this.getElementData(targetElement);
 
     if (elementData) {
       // 更新数据，使用Math.floor确保整数
@@ -175,19 +166,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 更新内部矩形的大小和位置，确保始终与外矩形四边保持10px的间距
-    const innerBorder = state.selectedElement.querySelector(".inner-border");
+    const innerBorder =
+      this.state.selectedElement?.querySelector(".inner-border");
     if (innerBorder) {
       // 获取外部矩形的实际大小（不含边框）
-      const outerWidth = parseInt(state.selectedElement.style.width);
-      const outerHeight = parseInt(state.selectedElement.style.height);
+      const outerWidth = parseInt(this.state.selectedElement.style.width);
+      const outerHeight = parseInt(this.state.selectedElement.style.height);
 
       // 计算内部矩形的大小，确保与外部矩形四边都保持10px间距
       const padding = 10;
-      // 内部矩形的边框宽度
       const innerBorderWidth = 3;
 
       // 计算内部矩形的大小，考虑内矩形自身的边框宽度
-      // 公式：内部矩形宽度 = 外部矩形宽度 - 2 * 内边距 - 2 * 内部矩形边框宽度
       const innerWidth = Math.max(
         20,
         outerWidth - padding * 2 - innerBorderWidth * 2
@@ -203,7 +193,31 @@ document.addEventListener("DOMContentLoaded", function () {
       innerBorder.style.width = innerWidth + "px";
       innerBorder.style.height = innerHeight + "px";
     }
-  };
+  }
 
-  // 初始化由base.js统一控制，不再需要通知主模块
-});
+  // 清除所有元素
+  clearAllElements() {
+    // 安全地清除元素
+    if (!this.canvas || !this.canvasOverlay) return;
+
+    // 获取除了canvasOverlay之外的所有元素
+    const elements = Array.from(this.canvas.children).filter(
+      (child) => child !== this.canvasOverlay
+    );
+
+    // 逐个移除元素
+    elements.forEach((element) => {
+      if (element.parentNode === this.canvas) {
+        this.canvas.removeChild(element);
+      }
+    });
+
+    // 重置状态
+    this.state.designElements = [];
+    this.state.selectedElement = null;
+    this.state.isDrawing = false;
+    this.state.isDragging = false;
+    this.state.isResizing = false;
+    this.state.isMullionDrawing = false;
+  }
+}
