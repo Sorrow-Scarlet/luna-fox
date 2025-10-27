@@ -20,7 +20,7 @@ class ElementManager {
     if (elementData.type === "border") {
       element.classList.add("border-element");
       // 创建矩形环（空心矩形）效果
-      element.style.backgroundColor = "#009456";
+      element.style.backgroundColor = "#f9b4ffff";
       element.style.border = "3px solid #333";
 
       // 在内部距离描边10px的位置创建一个相同的矩形
@@ -55,7 +55,7 @@ class ElementManager {
     } else if (elementData.type === "mullion") {
       // 中梃元素样式 - 10px粗，与外矩形色彩一致
       element.classList.add("mullion-element");
-      element.style.backgroundColor = "#802040";
+      element.style.backgroundColor = "#f9b4ffff";
       element.style.border = "none";
       element.style.zIndex = "20";
     } else if (elementData.type === "grid") {
