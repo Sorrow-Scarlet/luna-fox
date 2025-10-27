@@ -438,8 +438,9 @@ class EventManager {
     const width = Math.abs(endX - this.state.startX);
     const height = Math.abs(endY - this.state.startY);
 
-    // 确保最小尺寸
-    if (width < 20 || height < 20) return;
+    // 确保最小尺寸：边框必须足够大以容纳内矩形（10px内边距 + 10px最小内矩形 + 边框宽度）
+    const minBorderSize = 10 + 10 + 6; // 10px内边距 + 10px最小内矩形 + 6px边框宽度
+    if (width < minBorderSize || height < minBorderSize) return;
 
     // 根据当前工具创建相应元素
     let elementData;

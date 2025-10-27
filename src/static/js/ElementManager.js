@@ -187,18 +187,24 @@ class ElementManager {
       const outerWidth = parseInt(this.state.selectedElement.style.width);
       const outerHeight = parseInt(this.state.selectedElement.style.height);
 
-      // 计算内部矩形的大小，确保与外部矩形四边都保持10px间距
+      // 计算内部矩形的大小，确保内矩形始终小于外矩形，且最小为10px × 10px
       const padding = 10;
       const innerBorderWidth = 3;
 
       // 计算内部矩形的大小，考虑内矩形自身的边框宽度
       const innerWidth = Math.max(
-        20,
-        outerWidth - padding * 2 - innerBorderWidth * 2
+        10, // 最小宽度10px
+        Math.min(
+          outerWidth - padding * 2 - innerBorderWidth * 2 - 1, // 确保小于外矩形
+          outerWidth - padding * 2 - innerBorderWidth * 2
+        )
       );
       const innerHeight = Math.max(
-        20,
-        outerHeight - padding * 2 - innerBorderWidth * 2
+        10, // 最小高度10px
+        Math.min(
+          outerHeight - padding * 2 - innerBorderWidth * 2 - 1, // 确保小于外矩形
+          outerHeight - padding * 2 - innerBorderWidth * 2
+        )
       );
 
       // 精确设置内部矩形的位置和大小
@@ -339,19 +345,27 @@ class ElementManager {
       const borderWidth = parseInt(borderElement.style.width) || 0;
       const borderHeight = parseInt(borderElement.style.height) || 0;
 
-      // 计算中梃相对于边框的相对位置和尺寸
+      // 计算中梃相对于边框的相对位置
       const relativeLeft = (currentLeft - borderLeft) / borderWidth;
       const relativeTop = (currentTop - borderTop) / borderHeight;
-      const relativeWidth = currentWidth / borderWidth;
-      const relativeHeight = currentHeight / borderHeight;
 
-      // 应用新的位置和尺寸（保持相对比例）
+      // 应用新的位置（保持相对比例），但保持中梃厚度为10px
       mullion.style.left =
         borderLeft + relativeLeft * borderWidth * scaleX + deltaX + "px";
       mullion.style.top =
         borderTop + relativeTop * borderHeight * scaleY + deltaY + "px";
-      mullion.style.width = currentWidth * scaleX + "px";
-      mullion.style.height = currentHeight * scaleY + "px";
+
+      // 中梃厚度始终为10px，不随比例缩放
+      const elementData = this.getElementData(mullion);
+      if (elementData && elementData.type === "mullion-horizontal") {
+        // 水平中梃：宽度随边框缩放，高度保持10px
+        mullion.style.width = currentWidth * scaleX + "px";
+        mullion.style.height = "10px";
+      } else if (elementData && elementData.type === "mullion-vertical") {
+        // 垂直中梃：高度随边框缩放，宽度保持10px
+        mullion.style.width = "10px";
+        mullion.style.height = currentHeight * scaleY + "px";
+      }
 
       // 更新设计数据
       this.updateElementData(mullion);
