@@ -136,18 +136,36 @@ document.addEventListener("DOMContentLoaded", function () {
     if (elementData.type === "border") {
       element.classList.add("border-element");
       // 创建矩形环（空心矩形）效果
-      element.style.backgroundColor = "transparent";
+      element.style.backgroundColor = "#009456";
       element.style.border = "3px solid #333";
 
       // 在内部距离描边10px的位置创建一个相同的矩形
       const innerBorder = document.createElement("div");
       innerBorder.classList.add("drawn-element", "inner-border");
       innerBorder.style.position = "absolute";
-      innerBorder.style.left = "10px";
-      innerBorder.style.top = "10px";
-      innerBorder.style.width = elementData.width - 20 + "px";
-      innerBorder.style.height = elementData.height - 20 + "px";
-      innerBorder.style.backgroundColor = "transparent";
+
+      // 使用统一的padding变量，确保计算一致
+      const padding = 10;
+      // 内部矩形的边框宽度
+      const innerBorderWidth = 3;
+
+      // 计算内部矩形的大小，考虑内矩形自身的边框宽度，确保与外部矩形四边都保持10px间距
+      // 公式：内部矩形宽度 = 外部矩形宽度 - 2 * 内边距 - 2 * 内部矩形边框宽度
+      const innerWidth = Math.max(
+        20,
+        elementData.width - padding * 2 - innerBorderWidth * 2
+      );
+      const innerHeight = Math.max(
+        20,
+        elementData.height - padding * 2 - innerBorderWidth * 2
+      );
+
+      // 精确设置内部矩形的位置和大小
+      innerBorder.style.left = padding + "px";
+      innerBorder.style.top = padding + "px";
+      innerBorder.style.width = innerWidth + "px";
+      innerBorder.style.height = innerHeight + "px";
+      innerBorder.style.backgroundColor = "white";
       innerBorder.style.border = "3px solid #333";
       innerBorder.style.pointerEvents = "none"; // 避免内部矩形影响点击交互
       element.appendChild(innerBorder);
@@ -386,27 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // 更新元素数据
-  function updateElementData() {
-    if (!selectedElement) return;
-
-    // 找到对应的设计数据
-    const elementIndex = Array.from(designerCanvas.children).findIndex(
-      (child) => child === selectedElement
-    );
-
-    if (elementIndex !== -1 && elementIndex < designElements.length) {
-      designElements[elementIndex].x = parseInt(selectedElement.style.left);
-      designElements[elementIndex].y = parseInt(selectedElement.style.top);
-      designElements[elementIndex].width = parseInt(
-        selectedElement.style.width
-      );
-      designElements[elementIndex].height = parseInt(
-        selectedElement.style.height
-      );
-    }
-  }
-
   // 鼠标松开事件
   document.addEventListener("mouseup", function (e) {
     if (isDrawing) {
@@ -449,6 +446,57 @@ document.addEventListener("DOMContentLoaded", function () {
       resizeHandle = null;
     }
   });
+
+  // 更新元素数据
+  function updateElementData() {
+    if (!selectedElement) return;
+
+    // 找到对应的设计数据
+    const elementIndex = Array.from(designerCanvas.children).findIndex(
+      (child) => child === selectedElement
+    );
+
+    if (elementIndex !== -1 && elementIndex < designElements.length) {
+      designElements[elementIndex].x = parseInt(selectedElement.style.left);
+      designElements[elementIndex].y = parseInt(selectedElement.style.top);
+      designElements[elementIndex].width = parseInt(
+        selectedElement.style.width
+      );
+      designElements[elementIndex].height = parseInt(
+        selectedElement.style.height
+      );
+    }
+
+    // 更新内部矩形的大小和位置，确保始终与外矩形四边保持10px的间距
+    const innerBorder = selectedElement.querySelector(".inner-border");
+    if (innerBorder) {
+      // 获取外部矩形的实际大小（不含边框）
+      const outerWidth = parseInt(selectedElement.style.width);
+      const outerHeight = parseInt(selectedElement.style.height);
+
+      // 计算内部矩形的大小，确保与外部矩形四边都保持10px间距
+      const padding = 10;
+      // 内部矩形的边框宽度
+      const innerBorderWidth = 3;
+
+      // 计算内部矩形的大小，考虑内矩形自身的边框宽度
+      // 公式：内部矩形宽度 = 外部矩形宽度 - 2 * 内边距 - 2 * 内部矩形边框宽度
+      const innerWidth = Math.max(
+        20,
+        outerWidth - padding * 2 - innerBorderWidth * 2
+      );
+      const innerHeight = Math.max(
+        20,
+        outerHeight - padding * 2 - innerBorderWidth * 2
+      );
+
+      // 精确设置内部矩形的位置和大小
+      innerBorder.style.left = padding + "px";
+      innerBorder.style.top = padding + "px";
+      innerBorder.style.width = innerWidth + "px";
+      innerBorder.style.height = innerHeight + "px";
+    }
+  }
 
   // 窗口大小变化时重新调整画布大小
   window.addEventListener("resize", initCanvasSize);
