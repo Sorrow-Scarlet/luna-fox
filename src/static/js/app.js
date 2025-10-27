@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 应用状态
   let currentTool = "move";
-  let currentMaterial = "aluminum";
   let isDrawing = false;
   let startX, startY;
   let selectedElement = null;
@@ -39,9 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll(".tool-btn[data-tool]").forEach((b) => {
         b.classList.remove("active");
       });
-      document.querySelectorAll(".tool-btn[data-material]").forEach((b) => {
-        b.classList.remove("active");
-      });
 
       // 设置当前工具
       if (this.dataset.tool) {
@@ -57,9 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
             removeResizeHandles();
           }
         }
-      } else if (this.dataset.material) {
-        currentMaterial = this.dataset.material;
-        this.classList.add("active");
       }
     });
   });
@@ -166,11 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
       element.classList.add("sash-element", "with-screen");
     } else if (elementData.type === "sash-no-screen") {
       element.classList.add("sash-element", "no-screen");
-    }
-
-    // 根据材料设置样式
-    if (elementData.material) {
-      element.classList.add("material-" + elementData.material);
     }
 
     // 添加到画布
@@ -445,7 +433,6 @@ document.addEventListener("DOMContentLoaded", function () {
           y: top,
           width: width,
           height: height,
-          material: currentMaterial,
         };
 
         // 添加到画布

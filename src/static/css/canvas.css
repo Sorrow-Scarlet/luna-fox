@@ -72,29 +72,6 @@
   background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
 }
 
-/* 材料样式 */
-.material-aluminum {
-  border-color: #9ca3af;
-  background-color: rgba(156, 163, 175, 0.05);
-}
-
-.material-upvc {
-  border-color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.05);
-}
-
-.material-glass {
-  border-color: #0ea5e9;
-  background-color: rgba(14, 165, 233, 0.1);
-  background-image: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0.3) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
 /* 设计器画布相对定位 */
 .designer-canvas {
   position: relative;
