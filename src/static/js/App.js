@@ -105,6 +105,11 @@ class AppState {
     this.mullionEndPoint = null;
     this.mullionIndicator = null;
     this.isSaved = false;
+
+    // 中梃相关状态
+    this.mullionWidth = 10; // 中梃宽度10px
+    this.mullionSplitRatio = 0.5; // 默认分割比例
+    this.activeMullion = null; // 当前激活的中梃
   }
 }
 

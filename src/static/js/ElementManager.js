@@ -52,12 +52,18 @@ class ElementManager {
       innerBorder.style.border = "3px solid #333";
       innerBorder.style.pointerEvents = "none"; // 避免内部矩形影响点击交互
       element.appendChild(innerBorder);
-    } else if (elementData.type === "mullion") {
+    } else if (
+      elementData.type === "mullion-horizontal" ||
+      elementData.type === "mullion-vertical"
+    ) {
       // 中梃元素样式 - 10px粗，与外矩形色彩一致
       element.classList.add("mullion-element");
       element.style.backgroundColor = "#f9b4ffff";
       element.style.border = "none";
       element.style.zIndex = "20";
+
+      // 添加拖动调节手柄
+      this.addMullionDragHandle(element, elementData.type);
     } else if (elementData.type === "grid") {
       element.classList.add("grid-element");
     } else if (elementData.type === "sash-with-screen") {
@@ -195,6 +201,43 @@ class ElementManager {
     }
   }
 
+  // 添加中梃拖动调节手柄
+  addMullionDragHandle(element, mullionType) {
+    const dragHandle = document.createElement("div");
+    dragHandle.classList.add("mullion-drag-handle");
+
+    if (mullionType === "mullion-horizontal") {
+      dragHandle.style.width = "20px";
+      dragHandle.style.height = "10px";
+      dragHandle.style.left = "50%";
+      dragHandle.style.top = "-5px";
+      dragHandle.style.transform = "translateX(-50%)";
+      dragHandle.style.cursor = "ns-resize";
+    } else {
+      dragHandle.style.width = "10px";
+      dragHandle.style.height = "20px";
+      dragHandle.style.left = "-5px";
+      dragHandle.style.top = "50%";
+      dragHandle.style.transform = "translateY(-50%)";
+      dragHandle.style.cursor = "ew-resize";
+    }
+
+    dragHandle.style.position = "absolute";
+    dragHandle.style.backgroundColor = "#ff6b6b";
+    dragHandle.style.borderRadius = "2px";
+    dragHandle.style.zIndex = "30";
+
+    // 添加鼠标事件
+    dragHandle.addEventListener("mousedown", (e) => {
+      e.stopPropagation();
+      this.state.isMullionDragging = true;
+      this.state.activeMullion = element;
+      this.state.mullionType = mullionType;
+    });
+
+    element.appendChild(dragHandle);
+  }
+
   // 清除所有元素
   clearAllElements() {
     // 安全地清除元素
@@ -219,5 +262,7 @@ class ElementManager {
     this.state.isDragging = false;
     this.state.isResizing = false;
     this.state.isMullionDrawing = false;
+    this.state.isMullionDragging = false;
+    this.state.activeMullion = null;
   }
 }

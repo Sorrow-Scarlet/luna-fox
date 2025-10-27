@@ -220,6 +220,44 @@
   cursor: w-resize;
 }
 
+/* 中梃元素样式 */
+.mullion-element {
+  position: absolute;
+  background-color: #f9b4ffff;
+  border: none;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.mullion-element:hover {
+  background-color: #e89be6ff;
+}
+
+.mullion-element.selected {
+  background-color: #d182d0ff;
+  box-shadow: 0 0 0 2px rgba(128, 32, 64, 0.3);
+}
+
+/* 中梃拖动手柄 */
+.mullion-drag-handle {
+  position: absolute;
+  background-color: #ff6b6b;
+  border-radius: 2px;
+  z-index: 30;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.mullion-drag-handle:hover {
+  background-color: #ff5252;
+  transform: scale(1.1);
+}
+
+.mullion-drag-handle:active {
+  background-color: #ff3838;
+  transform: scale(0.95);
+}
+
 /* 底栏组件 */
 .status-left {
   display: flex;

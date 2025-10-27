@@ -109,6 +109,8 @@ class EventManager {
       this.dragElement(e);
     } else if (this.state.isResizing && this.state.selectedElement) {
       this.resizeElement(e);
+    } else if (this.state.isMullionDragging && this.state.activeMullion) {
+      this.dragMullion(e);
     }
   }
 
@@ -268,6 +270,80 @@ class EventManager {
     this.elementManager.updateElementData(this.state.selectedElement);
   }
 
+  // 拖动中梃调节分割比例
+  dragMullion(e) {
+    if (!this.state.activeMullion) return;
+
+    const coords = this.getCanvasCoordinates(e);
+
+    // 获取中梃对应的边框元素
+    const borderElement = this.findParentBorder(this.state.activeMullion);
+    if (!borderElement) return;
+
+    const borderData = this.elementManager.getElementData(borderElement);
+    if (!borderData) return;
+
+    // 计算内框矩形（考虑10px内边距）
+    const innerX = borderData.x + 10;
+    const innerY = borderData.y + 10;
+    const innerWidth = Math.max(20, borderData.width - 20);
+    const innerHeight = Math.max(20, borderData.height - 20);
+
+    if (this.state.mullionType === "mullion-horizontal") {
+      // 水平中梃：上下分割
+      const relativeY = coords.y - innerY;
+      const ratio = Math.max(0.1, Math.min(0.9, relativeY / innerHeight));
+
+      // 更新中梃位置
+      const mullionY =
+        innerY + innerHeight * ratio - this.state.mullionWidth / 2;
+      this.state.activeMullion.style.top = mullionY + "px";
+
+      // 更新分割比例
+      this.state.mullionSplitRatio = ratio;
+    } else {
+      // 垂直中梃：左右分割
+      const relativeX = coords.x - innerX;
+      const ratio = Math.max(0.1, Math.min(0.9, relativeX / innerWidth));
+
+      // 更新中梃位置
+      const mullionX =
+        innerX + innerWidth * ratio - this.state.mullionWidth / 2;
+      this.state.activeMullion.style.left = mullionX + "px";
+
+      // 更新分割比例
+      this.state.mullionSplitRatio = ratio;
+    }
+  }
+
+  // 查找中梃对应的父边框元素
+  findParentBorder(mullionElement) {
+    const elements = Array.from(this.canvas.children).filter(
+      (child) => child !== this.canvasOverlay
+    );
+
+    // 查找边框元素（包含inner-border的元素）
+    return elements.find((element) => {
+      return (
+        element.querySelector(".inner-border") &&
+        this.isMullionInsideBorder(mullionElement, element)
+      );
+    });
+  }
+
+  // 判断中梃是否在边框内
+  isMullionInsideBorder(mullionElement, borderElement) {
+    const mullionRect = mullionElement.getBoundingClientRect();
+    const borderRect = borderElement.getBoundingClientRect();
+
+    return (
+      mullionRect.left >= borderRect.left &&
+      mullionRect.right <= borderRect.right &&
+      mullionRect.top >= borderRect.top &&
+      mullionRect.bottom <= borderRect.bottom
+    );
+  }
+
   // 鼠标释放事件
   handleDocumentMouseUp(e) {
     if (this.state.isDrawing) {
@@ -277,6 +353,9 @@ class EventManager {
     } else if (this.state.isResizing) {
       this.state.isResizing = false;
       this.state.resizeHandle = null;
+    } else if (this.state.isMullionDragging) {
+      this.state.isMullionDragging = false;
+      this.state.activeMullion = null;
     }
   }
 
@@ -301,19 +380,82 @@ class EventManager {
     if (width < 20 || height < 20) return;
 
     // 根据当前工具创建相应元素
-    const elementData = {
-      x: left,
-      y: top,
-      width: width,
-      height: height,
-      type: this.state.currentTool,
-    };
+    let elementData;
+
+    if (
+      this.state.currentTool === "mullion-horizontal" ||
+      this.state.currentTool === "mullion-vertical"
+    ) {
+      // 中梃绘制：基于内框矩形进行分割
+      const borderElement = this.findLatestBorderElement();
+      if (!borderElement) return; // 如果没有边框元素，不绘制中梃
+
+      const borderData = this.elementManager.getElementData(borderElement);
+      if (!borderData) return;
+
+      // 计算内框矩形（考虑10px内边距）
+      const innerX = borderData.x + 10;
+      const innerY = borderData.y + 10;
+      const innerWidth = Math.max(20, borderData.width - 20);
+      const innerHeight = Math.max(20, borderData.height - 20);
+
+      if (this.state.currentTool === "mullion-horizontal") {
+        // 水平中梃：连接左右边，垂直分割
+        const mullionY =
+          innerY +
+          innerHeight * this.state.mullionSplitRatio -
+          this.state.mullionWidth / 2;
+        elementData = {
+          x: innerX,
+          y: mullionY,
+          width: innerWidth,
+          height: this.state.mullionWidth,
+          type: "mullion-horizontal",
+        };
+      } else {
+        // 垂直中梃：连接上下边，水平分割
+        const mullionX =
+          innerX +
+          innerWidth * this.state.mullionSplitRatio -
+          this.state.mullionWidth / 2;
+        elementData = {
+          x: mullionX,
+          y: innerY,
+          width: this.state.mullionWidth,
+          height: innerHeight,
+          type: "mullion-vertical",
+        };
+      }
+    } else {
+      // 其他元素正常绘制
+      elementData = {
+        x: left,
+        y: top,
+        width: width,
+        height: height,
+        type: this.state.currentTool,
+      };
+    }
 
     // 保存历史记录
     this.historyManager.saveHistory();
 
     // 添加元素
     this.elementManager.addElement(elementData);
+  }
+
+  // 查找最新的边框元素
+  findLatestBorderElement() {
+    const elements = Array.from(this.canvas.children).filter(
+      (child) => child !== this.canvasOverlay
+    );
+
+    // 查找最新的边框元素（包含inner-border的元素）
+    const borderElements = elements.filter((element) =>
+      element.querySelector(".inner-border")
+    );
+
+    return borderElements[borderElements.length - 1]; // 返回最新的边框元素
   }
 
   // 获取相对于画布的坐标
