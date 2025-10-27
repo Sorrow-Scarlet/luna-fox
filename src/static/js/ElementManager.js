@@ -84,6 +84,14 @@ class ElementManager {
     // 保存到设计元素数组
     this.state.designElements.push(elementData);
 
+    // 如果是中梃元素，建立与边框的组合关系
+    if (
+      elementData.type === "mullion-horizontal" ||
+      elementData.type === "mullion-vertical"
+    ) {
+      this.associateMullionWithBorder(element);
+    }
+
     return element;
   }
 
@@ -264,5 +272,89 @@ class ElementManager {
     this.state.isMullionDrawing = false;
     this.state.isMullionDragging = false;
     this.state.activeMullion = null;
+
+    // 清除组合关系
+    this.state.mullionGroups.clear();
+  }
+
+  // 建立中梃与边框的组合关系
+  associateMullionWithBorder(mullionElement) {
+    const borderElement = this.findParentBorder(mullionElement);
+    if (!borderElement) return;
+
+    // 获取或创建边框对应的中梃数组
+    if (!this.state.mullionGroups.has(borderElement)) {
+      this.state.mullionGroups.set(borderElement, []);
+    }
+
+    const mullions = this.state.mullionGroups.get(borderElement);
+    if (!mullions.includes(mullionElement)) {
+      mullions.push(mullionElement);
+    }
+  }
+
+  // 查找中梃对应的父边框元素
+  findParentBorder(mullionElement) {
+    const elements = Array.from(this.canvas.children).filter(
+      (child) => child !== this.canvasOverlay
+    );
+
+    // 查找边框元素（包含inner-border的元素）
+    return elements.find((element) => {
+      return (
+        element.querySelector(".inner-border") &&
+        this.isMullionInsideBorder(mullionElement, element)
+      );
+    });
+  }
+
+  // 判断中梃是否在边框内
+  isMullionInsideBorder(mullionElement, borderElement) {
+    const mullionRect = mullionElement.getBoundingClientRect();
+    const borderRect = borderElement.getBoundingClientRect();
+
+    return (
+      mullionRect.left >= borderRect.left &&
+      mullionRect.right <= borderRect.right &&
+      mullionRect.top >= borderRect.top &&
+      mullionRect.bottom <= borderRect.bottom
+    );
+  }
+
+  // 更新与边框组合的中梃位置
+  updateAssociatedMullions(borderElement, deltaX, deltaY, scaleX, scaleY) {
+    if (!this.state.mullionGroups.has(borderElement)) return;
+
+    const mullions = this.state.mullionGroups.get(borderElement);
+    mullions.forEach((mullion) => {
+      // 获取中梃的当前位置和尺寸
+      const currentLeft = parseInt(mullion.style.left) || 0;
+      const currentTop = parseInt(mullion.style.top) || 0;
+      const currentWidth = parseInt(mullion.style.width) || 0;
+      const currentHeight = parseInt(mullion.style.height) || 0;
+
+      // 获取边框的当前位置和尺寸
+      const borderLeft = parseInt(borderElement.style.left) || 0;
+      const borderTop = parseInt(borderElement.style.top) || 0;
+      const borderWidth = parseInt(borderElement.style.width) || 0;
+      const borderHeight = parseInt(borderElement.style.height) || 0;
+
+      // 计算中梃相对于边框的相对位置和尺寸
+      const relativeLeft = (currentLeft - borderLeft) / borderWidth;
+      const relativeTop = (currentTop - borderTop) / borderHeight;
+      const relativeWidth = currentWidth / borderWidth;
+      const relativeHeight = currentHeight / borderHeight;
+
+      // 应用新的位置和尺寸（保持相对比例）
+      mullion.style.left =
+        borderLeft + relativeLeft * borderWidth * scaleX + deltaX + "px";
+      mullion.style.top =
+        borderTop + relativeTop * borderHeight * scaleY + deltaY + "px";
+      mullion.style.width = currentWidth * scaleX + "px";
+      mullion.style.height = currentHeight * scaleY + "px";
+
+      // 更新设计数据
+      this.updateElementData(mullion);
+    });
   }
 }

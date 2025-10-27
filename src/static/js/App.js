@@ -110,6 +110,9 @@ class AppState {
     this.mullionWidth = 10; // 中梃宽度10px
     this.mullionSplitRatio = 0.5; // 默认分割比例
     this.activeMullion = null; // 当前激活的中梃
+
+    // 中梃与边框的组合关系
+    this.mullionGroups = new Map(); // key: 边框元素, value: 中梃元素数组
   }
 }
 

@@ -199,6 +199,20 @@
   cursor: n-resize;
 }
 
+/* 中梃拖动手柄 */
+.mullion-drag-handle {
+  position: absolute;
+  background-color: #ff6b6b;
+  border-radius: 2px;
+  z-index: 30;
+  transition: all 0.2s ease;
+}
+
+.mullion-drag-handle:hover {
+  background-color: #ff5252;
+  transform: scale(1.1);
+}
+
 .resize-handle.s {
   bottom: -8px;
   left: 50%;

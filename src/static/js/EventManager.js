@@ -82,7 +82,12 @@ class EventManager {
 
     // 如果是移动工具，准备拖拽
     if (this.state.currentTool === "move") {
-      this.startDragging(e);
+      // 检查是否是中梃元素
+      if (e.target.classList.contains("mullion-element")) {
+        this.startMullionDragging(e);
+      } else {
+        this.startDragging(e);
+      }
     }
   }
 
@@ -94,6 +99,21 @@ class EventManager {
 
     this.state.elementOffsetX = e.clientX - elementRect.left;
     this.state.elementOffsetY = e.clientY - elementRect.top;
+
+    // 准备历史记录
+    this.historyManager.saveHistory();
+  }
+
+  // 开始中梃拖拽
+  startMullionDragging(e) {
+    this.state.isMullionDragging = true;
+    this.state.activeMullion = e.target;
+
+    // 判断中梃类型
+    const elementData = this.elementManager.getElementData(e.target);
+    if (elementData && elementData.type) {
+      this.state.mullionType = elementData.type;
+    }
 
     // 准备历史记录
     this.historyManager.saveHistory();
@@ -148,6 +168,10 @@ class EventManager {
     const newX = e.clientX - canvasRect.left - this.state.elementOffsetX;
     const newY = e.clientY - canvasRect.top - this.state.elementOffsetY;
 
+    // 获取原始位置
+    const originalLeft = parseInt(this.state.selectedElement.style.left) || 0;
+    const originalTop = parseInt(this.state.selectedElement.style.top) || 0;
+
     // 更新元素位置（限制在画布内）
     const boundedX = Math.max(
       0,
@@ -164,11 +188,26 @@ class EventManager {
       )
     );
 
+    // 计算位置变化量
+    const deltaX = boundedX - originalLeft;
+    const deltaY = boundedY - originalTop;
+
     this.state.selectedElement.style.left = boundedX + "px";
     this.state.selectedElement.style.top = boundedY + "px";
 
     // 更新设计数据
     this.elementManager.updateElementData(this.state.selectedElement);
+
+    // 如果是边框元素，更新关联的中梃位置
+    if (this.state.selectedElement.classList.contains("border-element")) {
+      this.elementManager.updateAssociatedMullions(
+        this.state.selectedElement,
+        deltaX,
+        deltaY,
+        1,
+        1
+      );
+    }
   }
 
   // 调整元素大小
@@ -182,6 +221,10 @@ class EventManager {
     let elementWidth = parseInt(this.state.selectedElement.style.width) || 0;
     let elementHeight = parseInt(this.state.selectedElement.style.height) || 0;
     const minSize = 20; // 最小尺寸阈值
+
+    // 保存原始尺寸用于计算缩放比例
+    const originalWidth = elementWidth;
+    const originalHeight = elementHeight;
 
     // 根据手柄位置调整尺寸
     switch (this.state.resizeHandle) {
@@ -260,6 +303,14 @@ class EventManager {
         break;
     }
 
+    // 计算位置变化量和缩放比例
+    const deltaX =
+      elementLeft - parseInt(this.state.selectedElement.style.left) || 0;
+    const deltaY =
+      elementTop - parseInt(this.state.selectedElement.style.top) || 0;
+    const scaleX = originalWidth > 0 ? elementWidth / originalWidth : 1;
+    const scaleY = originalHeight > 0 ? elementHeight / originalHeight : 1;
+
     // 应用新的尺寸和位置
     this.state.selectedElement.style.left = elementLeft + "px";
     this.state.selectedElement.style.top = elementTop + "px";
@@ -268,6 +319,17 @@ class EventManager {
 
     // 更新设计数据
     this.elementManager.updateElementData(this.state.selectedElement);
+
+    // 如果是边框元素，更新关联的中梃位置和尺寸
+    if (this.state.selectedElement.classList.contains("border-element")) {
+      this.elementManager.updateAssociatedMullions(
+        this.state.selectedElement,
+        deltaX,
+        deltaY,
+        scaleX,
+        scaleY
+      );
+    }
   }
 
   // 拖动中梃调节分割比例
