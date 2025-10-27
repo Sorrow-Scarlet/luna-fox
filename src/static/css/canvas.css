@@ -61,19 +61,6 @@
   background-color: rgba(196, 49, 98, 0.1);
 }
 
-.sash-element.with-screen {
-  background-image: linear-gradient(
-      45deg,
-      rgba(196, 49, 98, 0.1) 25%,
-      transparent 25%
-    ),
-    linear-gradient(-45deg, rgba(196, 49, 98, 0.1) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(196, 49, 98, 0.1) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(196, 49, 98, 0.1) 75%);
-  background-size: 10px 10px;
-  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
-}
-
 /* 设计器画布相对定位 */
 .designer-canvas {
   position: relative;

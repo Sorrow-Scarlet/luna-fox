@@ -69,10 +69,10 @@ class ElementManager {
       }
     } else if (elementData.type === "grid") {
       element.classList.add("grid-element");
-    } else if (elementData.type === "sash-with-screen") {
-      element.classList.add("sash-element", "with-screen");
-    } else if (elementData.type === "sash-no-screen") {
-      element.classList.add("sash-element", "no-screen");
+    } else if (elementData.type === "casement") {
+      element.classList.add("sash-element", "casement");
+    } else if (elementData.type === "sliding") {
+      element.classList.add("sash-element", "sliding");
     }
 
     // 添加到画布
