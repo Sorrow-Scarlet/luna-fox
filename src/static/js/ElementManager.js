@@ -50,7 +50,8 @@ class ElementManager {
       innerBorder.style.height = innerHeight + "px";
       innerBorder.style.backgroundColor = "white";
       innerBorder.style.border = "3px solid #333";
-      innerBorder.style.pointerEvents = "none"; // 避免内部矩形影响点击交互
+      innerBorder.style.pointerEvents = "auto"; // 允许内部矩形被点击
+      innerBorder.dataset.type = "inner-border";
       element.appendChild(innerBorder);
     } else if (
       elementData.type === "mullion-horizontal" ||

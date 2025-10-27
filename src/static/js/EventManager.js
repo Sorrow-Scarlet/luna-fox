@@ -44,10 +44,23 @@ class EventManager {
       if (this.state.currentTool !== "move") {
         this.startDrawing(e);
       }
-    } else if (e.target.classList.contains("drawn-element")) {
-      // 点击的是元素
+    } else if (
+      e.target.classList.contains("drawn-element") ||
+      e.target.dataset.type === "inner-border"
+    ) {
+      // 点击的是元素或内矩形
       e.stopPropagation();
-      this.handleElementClick(e);
+
+      // 如果是内矩形点击且当前工具是中梃工具，创建中梃
+      if (
+        e.target.dataset.type === "inner-border" &&
+        (this.state.currentTool === "mullion-horizontal" ||
+          this.state.currentTool === "mullion-vertical")
+      ) {
+        this.createMullionOnInnerBorderClick(e);
+      } else {
+        this.handleElementClick(e);
+      }
     }
   }
 
@@ -77,13 +90,20 @@ class EventManager {
 
   // 处理元素点击
   handleElementClick(e) {
+    let targetElement = e.target;
+
+    // 如果点击的是内矩形，选择其父边框元素
+    if (targetElement.dataset.type === "inner-border") {
+      targetElement = targetElement.parentElement;
+    }
+
     // 先选择元素
-    this.elementManager.selectElement(e.target);
+    this.elementManager.selectElement(targetElement);
 
     // 如果是移动工具，准备拖拽
     if (this.state.currentTool === "move") {
       // 检查是否是中梃元素
-      if (e.target.classList.contains("mullion-element")) {
+      if (targetElement.classList.contains("mullion-element")) {
         this.startMullionDragging(e);
       } else {
         this.startDragging(e);
@@ -94,7 +114,14 @@ class EventManager {
   // 开始拖拽
   startDragging(e) {
     this.state.isDragging = true;
-    const elementRect = e.target.getBoundingClientRect();
+
+    // 如果点击的是内矩形，使用其父边框元素
+    let targetElement = e.target;
+    if (targetElement.dataset.type === "inner-border") {
+      targetElement = targetElement.parentElement;
+    }
+
+    const elementRect = targetElement.getBoundingClientRect();
     const canvasRect = this.canvas.getBoundingClientRect();
 
     this.state.elementOffsetX = e.clientX - elementRect.left;
@@ -417,6 +444,78 @@ class EventManager {
       mullionRect.top >= borderRect.top &&
       mullionRect.bottom <= borderRect.bottom
     );
+  }
+
+  // 在内矩形内部点击时创建中梃
+  createMullionOnInnerBorderClick(e) {
+    const coords = this.getCanvasCoordinates(e);
+
+    // 获取内矩形元素和其父边框元素
+    const innerBorder = e.target;
+    const borderElement = innerBorder.parentElement;
+
+    if (!borderElement || !borderElement.classList.contains("border-element")) {
+      return;
+    }
+
+    // 获取边框元素的数据
+    const borderData = this.elementManager.getElementData(borderElement);
+    if (!borderData) return;
+
+    // 计算内矩形的位置和尺寸
+    const padding = 10;
+    const innerBorderWidth = 3;
+    const innerX = borderData.x + padding;
+    const innerY = borderData.y + padding;
+    const innerWidth = Math.min(
+      Math.max(10, borderData.width - padding * 2 - innerBorderWidth * 2),
+      borderData.width - padding * 2 - innerBorderWidth * 2 - 1
+    );
+    const innerHeight = Math.min(
+      Math.max(10, borderData.height - padding * 2 - innerBorderWidth * 2),
+      borderData.height - padding * 2 - innerBorderWidth * 2 - 1
+    );
+
+    // 计算点击位置相对于内矩形的坐标
+    const relativeX = coords.x - innerX;
+    const relativeY = coords.y - innerY;
+
+    // 创建中梃元素数据
+    let elementData;
+
+    if (this.state.currentTool === "mullion-horizontal") {
+      // 水平中梃：基于Y坐标位置创建
+      const ratio = Math.max(0.1, Math.min(0.9, relativeY / innerHeight));
+      const mullionY = innerY + innerHeight * ratio;
+
+      elementData = {
+        x: innerX,
+        y: mullionY,
+        width: innerWidth,
+        height: this.state.mullionWidth,
+        type: "mullion-horizontal",
+      };
+    } else if (this.state.currentTool === "mullion-vertical") {
+      // 垂直中梃：基于X坐标位置创建
+      const ratio = Math.max(0.1, Math.min(0.9, relativeX / innerWidth));
+      const mullionX = innerX + innerWidth * ratio;
+
+      elementData = {
+        x: mullionX,
+        y: innerY,
+        width: this.state.mullionWidth,
+        height: innerHeight,
+        type: "mullion-vertical",
+      };
+    }
+
+    if (elementData) {
+      // 保存历史记录
+      this.historyManager.saveHistory();
+
+      // 添加中梃元素
+      this.elementManager.addElement(elementData);
+    }
   }
 
   // 鼠标释放事件
